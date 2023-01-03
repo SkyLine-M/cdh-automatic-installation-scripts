@@ -1,0 +1,6 @@
+name=Cloudera Manager
+baseurl=http://masterIp/cmRepo
+gpgcheck=0
+enabled=1
+autorefresh=0
+type=rpm-md

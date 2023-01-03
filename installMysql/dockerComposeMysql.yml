@@ -1,0 +1,15 @@
+version: '3'
+services:
+  docker_compose_mysql_8.0.17_3306:
+    image: mysql:8.0.17
+    container_name: docker_compose_mysql_8.0.17_3306
+    privileged: true
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    restart: always
+    ports:
+      - "3306:3306"
+    volumes:
+#      - ./db:/var/lib/mysql
+      # 数据库初始化脚本，当Mysql容器首次启动时，会在 /docker-entrypoint-initdb.d目录下扫描 .sh，.sql，.sql.gz类型的文件。如果这些类型的文件存在，将执行它们来初始化一个数据库；
+      - ./init/:/docker-entrypoint-initdb.d/

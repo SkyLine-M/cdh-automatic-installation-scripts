@@ -1,0 +1,7 @@
+# 配置时间服务器为本地的时间服务器
+server ntpServerIP
+
+restrict ntpServerIP nomodify notrap noquery
+
+server  127.127.1.0     # local clock
+fudge   127.127.1.0 stratum 10

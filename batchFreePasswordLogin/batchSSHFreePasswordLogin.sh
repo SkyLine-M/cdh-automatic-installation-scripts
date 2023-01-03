@@ -1,0 +1,57 @@
+#!/bin/bash
+
+current_path=$(cd $(dirname $0);pwd)
+parent_path=$(dirname "${current_path}")
+
+while read line; do
+  ip=$(echo $line | cut -d " " -f1)       # 提取文件中的ip
+  username=$(echo $line | cut -d " " -f2) # 提取文件中的用户名
+  password=$(echo $line | cut -d " " -f3) # 提取文件中的密码
+  yum -y install expect
+
+  echo "服务器${ip}创建脚本目录"
+  expect -c "set timeout -1;
+  spawn ssh ${username}@${ip} mkdir -p /root/bin/ssh
+  expect {
+     *password:* {send -- ${password}\r;exp_continue;}
+     *(yes/no)* {send -- yes\r;exp_continue;}
+     eof         {exit 0;}
+  }"
+
+  echo "服务器${ip}接收免密登录脚本"
+  expect -c "set timeout -1;
+  spawn scp ${current_path}/sshFreePasswordLogin.sh ${username}@${ip}:/root/bin/ssh
+  expect {
+     *password:* {send -- ${password}\r;exp_continue;}
+     *(yes/no)* {send -- yes\r;exp_continue;}
+     eof         {exit 0;}
+  }"
+
+  echo "服务器${ip}赋予免密登录脚本执行权限"
+  expect -c "set timeout -1;
+  spawn ssh ${username}@${ip} chmod +x /root/bin/ssh/sshFreePasswordLogin.sh
+  expect {
+     *password:* {send -- ${password}\r;exp_continue;}
+     *(yes/no)* {send -- yes\r;exp_continue;}
+     eof         {exit 0;}
+  }"
+
+  echo "服务器${ip}接收集群配置信息文件"
+  expect -c "set timeout -1;
+  spawn scp ${parent_path}/conf/hostConf ${username}@${ip}:/root/bin/ssh
+  expect {
+     *password:* {send -- ${password}\r;exp_continue;}
+     *(yes/no)* {send -- yes\r;exp_continue;}
+     eof         {exit 0;}
+  }"
+
+  echo "服务器${ip}执行免密登录脚本"
+  expect -c "set timeout -1;
+  spawn ssh ${username}@${ip} /root/bin/ssh/sshFreePasswordLogin.sh ${password}
+  expect {
+     *password:* {send -- ${password}\r;exp_continue;}
+     *(yes/no)* {send -- yes\r;exp_continue;}
+     eof         {exit 0;}
+  }"
+
+done < ${parent_path}/conf/hostConf # 读取存储ip的文件

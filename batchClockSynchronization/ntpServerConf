@@ -1,0 +1,17 @@
+# 允许内网其他机器同步时间
+restrict 192.168.1.0 mask 255.255.255.0 nomodify notrap
+
+# 中国这边最活跃的时间服务器 : http://www.pool.ntp.org/zone/cn
+server 210.72.145.44 perfer      # 中国国家受时中心
+server 202.112.10.36             # 1.cn.pool.ntp.org
+server 59.124.196.83             # 0.asia.pool.ntp.org
+
+# allow update time by the upper server
+# 允许上层时间服务器主动修改本机时间
+restrict 210.72.145.44 nomodify notrap noquery
+restrict 202.112.10.36 nomodify notrap noquery
+restrict 59.124.196.83 nomodify notrap noquery
+
+# 外部时间服务器不可用时，以本地时间作为时间服务
+server  127.127.1.0     # local clock
+fudge   127.127.1.0 stratum 10
